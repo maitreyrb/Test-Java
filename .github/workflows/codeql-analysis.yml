@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'javascript-typescript', 'java' ] # Adjust this list according to the languages in your repository
+        language: [ 'java' ] # Adjust this list according to the languages in your repository
 
     steps:
     - name: Checkout repository
