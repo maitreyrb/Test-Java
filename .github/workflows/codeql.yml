@@ -1,0 +1,24 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up CodeQL
+      uses: actions/setup-codeql@v2
+    - name: Initialize CodeQL
+      uses: actions/codeql/init@v2
+      with:
+        languages: java
+    - name: Autobuild
+      uses: actions/codeql/autobuild@v2
+    - name: Perform CodeQL Analysis
+      uses: actions/codeql/analyze@v2
