@@ -1,19 +1,26 @@
-name: Snyk Security Scan
+name: Scan for secrets
+
 on:
   push:
+    tags:
+      - v*
     branches:
-      - master
+      - main
   pull_request:
-      - master
+  workflow_dispatch:
+
 jobs:
   test:
+    if: github.repository == 'trufflesecurity/trufflehog'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Secret Scanning
-      uses: trufflesecurity/trufflehog@main
+        ref: ${{ github.head_ref }}
+    - name: Dogfood
+      uses: ./
+      id: dogfood
       with:
-        extra_args: --only-verified
+        extra_args: --results=verified,unknown
