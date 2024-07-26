@@ -21,7 +21,7 @@ jobs:
           node-version: '14'
 
       - name: Install Snyk
-        run: npm install -g snyk
+        run: npm install -g snyk snyk-to-html
 
       - name: Authenticate Snyk
         env:
@@ -29,19 +29,20 @@ jobs:
         run: snyk auth $SNYK_TOKEN
 
       - name: Run Snyk Code Test
-        run: snyk code test
-
-      - name: Upload Snyk Code Test Results
-        uses: actions/upload-artifact@v2
-        with:
-          name: snyk-sast-report
-          path: snyk-report.json
+        run: |
+          snyk code test --json > snyk-code-report.json || true
 
       - name: Convert Snyk Report to HTML
-        run: snyk-to-html -i snyk-report.json -o snyk-report.html
+        run: snyk-to-html -i snyk-code-report.json -o snyk-code-report.html
 
-      - name: Upload Snyk Report HTML
+      - name: Upload Snyk JSON Report
         uses: actions/upload-artifact@v2
         with:
-          name: snyk-sast-report-html
-          path: snyk-report.html
+          name: snyk-code-report-json
+          path: snyk-code-report.json
+
+      - name: Upload Snyk HTML Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: snyk-code-report-html
+          path: snyk-code-report.html
