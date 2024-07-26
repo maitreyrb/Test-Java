@@ -1,0 +1,27 @@
+name: TruffleHog Secret Scanning
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  trufflehog:
+    name: Run TruffleHog
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install TruffleHog
+        run: |
+          python3 -m venv venv
+          . venv/bin/activate
+          pip install trufflehog
+
+      - name: Run TruffleHog
+        run: |
+          . venv/bin/activate
+          trufflehog git https://github.com/${{ github.repository }}
