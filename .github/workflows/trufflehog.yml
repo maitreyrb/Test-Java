@@ -3,9 +3,7 @@ name: TruffleHog Scan
 on:
   push:
     branches:
-      - main
-  pull_request:
-
+      - master
 jobs:
   test:
     runs-on: ubuntu-latest
