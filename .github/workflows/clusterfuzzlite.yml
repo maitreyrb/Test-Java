@@ -1,37 +1,46 @@
-# .github/workflows/clusterfuzzlite.yml
-name: PR Fuzz (ClusterFuzzLite)
+name: ClusterFuzzLite PR Fuzzing
+
 on:
   pull_request:
 
 jobs:
-  clusterfuzzlite:
+  fuzz:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Set up Python (ClusterFuzzLite runner uses Python)
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install ClusterFuzzLite
+      - name: Install system dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install clusterfuzzlite
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang llvm cmake ninja-build \
+            python3 python3-pip \
+            libprotobuf-dev protobuf-compiler
 
-      - name: Build fuzzers
+      # ❌ DO NOT pip install clusterfuzzlite
+      # ✅ Clone it instead
+      - name: Checkout ClusterFuzzLite
         run: |
-          # Build fuzz targets with sanitizers (ASAN/UBSAN) — adapt to project
-          mkdir -p build && cd build
-          cmake -DCMAKE_C_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
-                -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" ..
-          make -j$(nproc)
+          git clone https://github.com/google/clusterfuzzlite.git
+
+      - name: Build fuzz targets (example)
+        env:
+          CC: clang
+          CXX: clang++
+          CFLAGS: "-fsanitize=address,undefined -fno-omit-frame-pointer"
+          CXXFLAGS: "-fsanitize=address,undefined -fno-omit-frame-pointer"
+        run: |
+          mkdir -p build
+          cd build
+          cmake -GNinja ..
+          ninja
 
       - name: Run ClusterFuzzLite (PR mode)
         env:
-          MODE: 'presubmit'   # or 'batch'
+          MODE: code_change
         run: |
-          # Example invocation; adjust paths and mode per docs
-          python -m clusterfuzzlite.run --mode=code_change --project-dir=$(pwd)
+          python3 clusterfuzzlite/run.py
+
 
