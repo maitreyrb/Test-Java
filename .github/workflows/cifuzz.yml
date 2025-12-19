@@ -1,0 +1,28 @@
+name: PR Fuzz (CIFuzz)
+on:
+  pull_request:
+permissions:
+  security-events: write
+
+jobs:
+  fuzz:
+    name: Run CIFuzz on PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Build your project and fuzz targets here.
+      # Replace with your normal build steps, ensuring fuzzers are built with sanitizers.
+      - name: Build fuzzers
+        run: |
+          # Example: adapt to your build system
+          mkdir -p build && cd build
+          cmake -DCMAKE_BUILD_TYPE=Debug ../
+          make -j$(nproc)
+
+      - name: Run CIFuzz (OSS-Fuzz)
+        uses: google/oss-fuzz@master
+        with:
+          project-name: Test-Java
+          # other options if needed
