@@ -4,26 +4,28 @@ on:
   pull_request:
 
 jobs:
-  clusterfuzzlite:
+  fuzz:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang llvm cmake ninja-build \
-                                  libprotobuf-dev protobuf-compiler \
-                                  python3 python3-pip
+          sudo apt-get install -y \
+            clang llvm cmake ninja-build \
+            python3 python3-pip \
+            libprotobuf-dev protobuf-compiler
 
+      # ❌ DO NOT pip install clusterfuzzlite
+      # ✅ Clone it instead
       - name: Checkout ClusterFuzzLite
         run: |
           git clone https://github.com/google/clusterfuzzlite.git
 
-      # 🔨 BUILD FUZZERS (THIS IS PROJECT-SPECIFIC)
-      - name: Build fuzz targets with sanitizers
+      - name: Build fuzz targets (example)
         env:
           CC: clang
           CXX: clang++
@@ -35,9 +37,9 @@ jobs:
           cmake -GNinja ..
           ninja
 
-      # 🚀 RUN CLUSTERFUZZLITE IN PR MODE
-      - name: Run ClusterFuzzLite (code change / PR mode)
+      - name: Run ClusterFuzzLite (PR mode)
         env:
           MODE: code_change
         run: |
           python3 clusterfuzzlite/run.py
+
