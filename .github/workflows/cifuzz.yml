@@ -1,28 +1,43 @@
-name: PR Fuzz (CIFuzz)
+name: ClusterFuzzLite PR Fuzzing
+
 on:
   pull_request:
-permissions:
-  security-events: write
 
 jobs:
-  fuzz:
-    name: Run CIFuzz on PR
+  clusterfuzzlite:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
 
-      # Build your project and fuzz targets here.
-      # Replace with your normal build steps, ensuring fuzzers are built with sanitizers.
-      - name: Build fuzzers
+      - name: Install dependencies
         run: |
-          # Example: adapt to your build system
-          mkdir -p build && cd build
-          cmake -DCMAKE_BUILD_TYPE=Debug ../
-          make -j$(nproc)
+          sudo apt-get update
+          sudo apt-get install -y clang llvm cmake ninja-build \
+                                  libprotobuf-dev protobuf-compiler \
+                                  python3 python3-pip
 
-      - name: Run CIFuzz (OSS-Fuzz)
-        uses: google/oss-fuzz@master
-        with:
-          project-name: Test-Java
-          # other options if needed
+      - name: Checkout ClusterFuzzLite
+        run: |
+          git clone https://github.com/google/clusterfuzzlite.git
+
+      # 🔨 BUILD FUZZERS (THIS IS PROJECT-SPECIFIC)
+      - name: Build fuzz targets with sanitizers
+        env:
+          CC: clang
+          CXX: clang++
+          CFLAGS: "-fsanitize=address,undefined -fno-omit-frame-pointer"
+          CXXFLAGS: "-fsanitize=address,undefined -fno-omit-frame-pointer"
+        run: |
+          mkdir -p build
+          cd build
+          cmake -GNinja ..
+          ninja
+
+      # 🚀 RUN CLUSTERFUZZLITE IN PR MODE
+      - name: Run ClusterFuzzLite (code change / PR mode)
+        env:
+          MODE: code_change
+        run: |
+          python3 clusterfuzzlite/run.py
