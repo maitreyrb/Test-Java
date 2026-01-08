@@ -20,30 +20,31 @@ jobs:
       - name: Prepare output file
         run: touch trufflehog-report.json
 
-      - name: Run TruffleHog v3.49.0 (CORRECT)
+      - name: Run TruffleHog v3.49.0
         continue-on-error: true
         uses: trufflesecurity/trufflehog@v3.49.0
         with:
           path: .
-          extra_args: --only-verified --json --output trufflehog-report.json
+          extra_args: --only-verified --json
 
-      - name: Convert JSON to HTML
-        run: |
-          echo "<html><body><h1>TruffleHog Secret Scan Report</h1>" > trufflehog-report.html
-          if [ -s trufflehog-report.json ]; then
-            echo "<h2>❌ Secrets Detected</h2><pre>" >> trufflehog-report.html
-            cat trufflehog-report.json >> trufflehog-report.html
-            echo "</pre>" >> trufflehog-report.html
-          else
-            echo "<h2>✅ No verified secrets detected</h2>" >> trufflehog-report.html
-          fi
-          echo "</body></html>" >> trufflehog-report.html
 
-      - name: Upload Reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: trufflehog-reports
-          path: |
-            trufflehog-report.json
-            trufflehog-report.html
+      # - name: Convert JSON to HTML
+      #   run: |
+      #     echo "<html><body><h1>TruffleHog Secret Scan Report</h1>" > trufflehog-report.html
+      #     if [ -s trufflehog-report.json ]; then
+      #       echo "<h2>❌ Secrets Detected</h2><pre>" >> trufflehog-report.html
+      #       cat trufflehog-report.json >> trufflehog-report.html
+      #       echo "</pre>" >> trufflehog-report.html
+      #     else
+      #       echo "<h2>✅ No verified secrets detected</h2>" >> trufflehog-report.html
+      #     fi
+      #     echo "</body></html>" >> trufflehog-report.html
+
+      # - name: Upload Reports
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: trufflehog-reports
+      #     path: |
+      #       trufflehog-report.json
+      #       trufflehog-report.html
