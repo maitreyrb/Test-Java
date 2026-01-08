@@ -2,21 +2,23 @@ name: TruffleHog Secret Scan
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, main ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, main ]
+  workflow_dispatch:
 
 jobs:
   trufflehog:
-    name: Run TruffleHog
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # REQUIRED for full history scan
 
       - name: Install Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
@@ -34,13 +36,13 @@ jobs:
           echo "</pre></body></html>" >> trufflehog-report.html
 
       - name: Upload TruffleHog JSON Report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: trufflehog-report-json
           path: trufflehog-report.json
 
       - name: Upload TruffleHog HTML Report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: trufflehog-report-html
           path: trufflehog-report.html
