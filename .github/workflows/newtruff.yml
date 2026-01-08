@@ -1,0 +1,50 @@
+name: TruffleHog new 
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create output directory
+        run: mkdir -p reports
+
+      - name: Run TruffleHog CLI scan
+        # Using direct Docker CLI so we can generate file outputs
+        run: |
+          echo "Running TruffleHog git scan..."
+          docker run --rm -v "$PWD:/repo" ghcr.io/trufflesecurity/trufflehog:3.49.0 \
+            git "file:///repo" --json > reports/trufflehog-results.json || true
+
+      - name: Convert JSON report to text
+        run: |
+          # Simple human-readable conversion
+          printf "TruffleHog Secret Scan Results\n\n" > reports/trufflehog-results.txt
+          jq -r '.[] | "* \(.commit): \(.path) -> \(.secret)"' reports/trufflehog-results.json >> reports/trufflehog-results.txt || echo "No secrets found" >> reports/trufflehog-results.txt
+
+      - name: Convert JSON report to HTML
+        run: |
+          echo "<html><body><h1>TruffleHog Scan Report</h1><pre>" > reports/trufflehog-results.html
+          if [ -s reports/trufflehog-results.json ]; then
+            jq '.' reports/trufflehog-results.json >> reports/trufflehog-results.html
+          else
+            echo "No secrets found" >> reports/trufflehog-results.html
+          fi
+          echo "</pre></body></html>" >> reports/trufflehog-results.html
+
+      - name: Upload scan artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: trufflehog-reports
+          path: reports/
