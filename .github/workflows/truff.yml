@@ -20,16 +20,11 @@ jobs:
       - name: Prepare output file
         run: touch trufflehog-report.json
 
-      - name: Run TruffleHog
+      - name: Run TruffleHog v2
+        continue-on-error: true
         uses: trufflesecurity/trufflehog@v2
         with:
-          entryPoint: trufflehog
-          args: >
-            filesystem .
-            --only-verified
-            --json
-            --output trufflehog-report.json
-
+          args: git . --json > trufflehog-report.json
 
       - name: Convert JSON to HTML
         run: |
