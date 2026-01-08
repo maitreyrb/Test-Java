@@ -20,12 +20,16 @@ jobs:
       - name: Create output directory
         run: mkdir -p reports
 
-      - name: Run TruffleHog CLI scan
-        # Using direct Docker CLI so we can generate file outputs
+      - name: Deep TruffleHog Scan (Max Depth)
         run: |
-          echo "Running TruffleHog git scan..."
-          docker run --rm -v "$PWD:/repo" ghcr.io/trufflesecurity/trufflehog:3.49.0 \
-            git "file:///repo" --json > reports/trufflehog-results.json || true
+          docker run --rm -v "$PWD:/repo" ghcr.io/trufflesecurity/trufflehog:3.92.4 \
+            git file:///repo \
+            --json \
+            --include-tags \
+            --include-branches \
+            --concurrency 4 \
+            > trufflehog-deep.json || true
+
 
       - name: Convert JSON report to text
         run: |
