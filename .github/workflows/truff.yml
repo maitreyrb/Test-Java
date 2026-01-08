@@ -1,4 +1,4 @@
-name: TruffleHog Secret Scan
+name: TruffleHog
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
         run: touch trufflehog-report.json
 
       - name: Run TruffleHog (Official)
-        uses: trufflesecurity/trufflehog@v3
+        uses: trufflesecurity/trufflehog@v2
         with:
           entryPoint: trufflehog
           args: >
