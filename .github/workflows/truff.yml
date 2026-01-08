@@ -20,7 +20,7 @@ jobs:
       - name: Prepare output file
         run: touch trufflehog-report.json
 
-      - name: Run TruffleHog (Official)
+      - name: Run TruffleHog
         uses: trufflesecurity/trufflehog@v2
         with:
           entryPoint: trufflehog
@@ -29,7 +29,7 @@ jobs:
             --only-verified
             --json
             --output trufflehog-report.json
-            || true
+
 
       - name: Convert JSON to HTML
         run: |
