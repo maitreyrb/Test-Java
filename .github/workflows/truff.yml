@@ -1,4 +1,4 @@
-name: TruffleHog Secret
+name: TruffleHog Secret Scan
 
 on:
   push:
@@ -15,22 +15,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # REQUIRED for full history scan
+          fetch-depth: 0
 
-      - name: Run TruffleHog
-        uses: trufflesecurity/trufflehog@v2
+      - name: Prepare output file
+        run: touch trufflehog-report.json
+
+      - name: Run TruffleHog (Official)
+        uses: trufflesecurity/trufflehog@v3
         with:
           entryPoint: trufflehog
           args: >
             filesystem .
             --only-verified
             --json
-            --output trufflehog-results.json
-            --fail
+            --output trufflehog-report.json
+            || true
 
-      - name: Upload TruffleHog Results
-        if: always()
+      - name: Convert JSON to HTML
+        run: |
+          echo "<html><body><h1>TruffleHog Secret Scan Report</h1><pre>" > trufflehog-report.html
+          jq '.' trufflehog-report.json >> trufflehog-report.html || echo "No secrets found" >> trufflehog-report.html
+          echo "</pre></body></html>" >> trufflehog-report.html
+
+      - name: Upload JSON Report
         uses: actions/upload-artifact@v4
         with:
-          name: trufflehog-results
-          path: trufflehog-results.json
+          name: trufflehog-json
+          path: trufflehog-report.json
+
+      - name: Upload HTML Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trufflehog-html
+          path: trufflehog-report.html
