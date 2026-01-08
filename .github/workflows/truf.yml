@@ -1,5 +1,4 @@
-name: Truf
-
+name: Truffle
 
 on:
   push:
@@ -9,9 +8,51 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  trufflehog:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Run TruffleHog
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare output file
+        run: touch trufflehog-report.json
+
+      - name: Run TruffleHog v3.49.0
+        continue-on-error: true
         uses: trufflesecurity/trufflehog@v3.49.0
+        with:
+          entryPoint: trufflehog
+          args: >
+            filesystem .
+            --only-verified
+            --json
+            --output trufflehog-report.json
+
+      - name: Convert JSON to HTML
+        run: |
+          echo "<html><body><h1>TruffleHog Secret Scan Report</h1>" > trufflehog-report.html
+          if [ -s trufflehog-report.json ]; then
+            echo "<h2>❌ Secrets Detected</h2><pre>" >> trufflehog-report.html
+            cat trufflehog-report.json >> trufflehog-report.html
+            echo "</pre>" >> trufflehog-report.html
+          else
+            echo "<h2>✅ No verified secrets detected</h2>" >> trufflehog-report.html
+          fi
+          echo "</body></html>" >> trufflehog-report.html
+
+      - name: Upload JSON Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trufflehog-json
+          path: trufflehog-report.json
+
+      - name: Upload HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trufflehog-html
+          path: trufflehog-report.html
