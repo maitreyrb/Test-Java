@@ -20,16 +20,12 @@ jobs:
       - name: Prepare output file
         run: touch trufflehog-report.json
 
-      - name: Run TruffleHog v3.49.0
+      - name: Run TruffleHog v3.49.0 (CORRECT)
         continue-on-error: true
         uses: trufflesecurity/trufflehog@v3.49.0
         with:
-          entryPoint: trufflehog
-          args: >
-            filesystem .
-            --only-verified
-            --json
-            --output trufflehog-report.json
+          path: .
+          extra_args: --only-verified --json --output trufflehog-report.json
 
       - name: Convert JSON to HTML
         run: |
@@ -43,16 +39,11 @@ jobs:
           fi
           echo "</body></html>" >> trufflehog-report.html
 
-      - name: Upload JSON Report
+      - name: Upload Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: trufflehog-json
-          path: trufflehog-report.json
-
-      - name: Upload HTML Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: trufflehog-html
-          path: trufflehog-report.html
+          name: trufflehog-reports
+          path: |
+            trufflehog-report.json
+            trufflehog-report.html
