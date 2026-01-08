@@ -22,7 +22,7 @@ jobs:
 
       - name: Run TruffleHog v2
         continue-on-error: true
-        uses: trufflesecurity/trufflehog@v2
+        uses: trufflesecurity/trufflehog@v3.49.0
         with:
           args: git . --json > trufflehog-report.json
 
