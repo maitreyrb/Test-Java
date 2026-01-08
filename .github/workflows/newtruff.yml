@@ -23,13 +23,10 @@ jobs:
       - name: Deep TruffleHog Scan (Max Depth)
         run: |
           docker run --rm -v "$PWD:/repo" ghcr.io/trufflesecurity/trufflehog:3.92.4 \
-            git file:///repo \
+            filesystem /repo \
             --json \
-            --include-tags \
-            --include-branches \
-            --concurrency 4 \
-            > trufflehog-deep.json || true
-
+            --enable-all-detectors \
+            > trufflehog-max.json || true
 
       - name: Convert JSON report to text
         run: |
