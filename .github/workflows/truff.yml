@@ -24,22 +24,23 @@ jobs:
         continue-on-error: true
         uses: trufflesecurity/trufflehog@v3.49.0
         with:
-          args: --json
+          path: .
+          extra_args: --json
 
-      - name: Convert JSON to HTML
-        run: |
-          echo "<html><body><h1>TruffleHog Secret Scan Report</h1><pre>" > trufflehog-report.html
-          jq '.' trufflehog-report.json >> trufflehog-report.html || echo "No secrets found" >> trufflehog-report.html
-          echo "</pre></body></html>" >> trufflehog-report.html
+      # - name: Convert JSON to HTML
+      #   run: |
+      #     echo "<html><body><h1>TruffleHog Secret Scan Report</h1><pre>" > trufflehog-report.html
+      #     jq '.' trufflehog-report.json >> trufflehog-report.html || echo "No secrets found" >> trufflehog-report.html
+      #     echo "</pre></body></html>" >> trufflehog-report.html
 
-      - name: Upload JSON Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: trufflehog-json
-          path: trufflehog-report.json
+      # - name: Upload JSON Report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: trufflehog-json
+      #     path: trufflehog-report.json
 
-      - name: Upload HTML Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: trufflehog-html
-          path: trufflehog-report.html
+      # - name: Upload HTML Report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: trufflehog-html
+      #     path: trufflehog-report.html
