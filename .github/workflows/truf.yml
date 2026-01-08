@@ -25,7 +25,9 @@ jobs:
         uses: trufflesecurity/trufflehog@v3.49.0
         with:
           path: .
-          extra_args: --only-verified --json
+          extra_args: --only-verified --sarif
+
+
 
 
       # - name: Convert JSON to HTML
