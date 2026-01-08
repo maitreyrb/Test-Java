@@ -1,10 +1,9 @@
 name: TruffleHog Secret Scan
 
 on:
-  push:
-    branches: [ "main", "master" ]
   pull_request:
-  workflow_dispatch:
+  push:
+    branches: [ "main" ]
 
 jobs:
   trufflehog:
@@ -14,12 +13,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # REQUIRED to scan full git history
+          fetch-depth: 0
 
       - name: Run TruffleHog
         uses: trufflesecurity/trufflehog@v3
         with:
           path: .
-          base: ""
-          head: ""
-          extra_args: --only-verified
+          extra_args: --json --output trufflehog-results.json
+
+      - name: Upload TruffleHog Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: trufflehog-results
+          path: trufflehog-results.json
+
